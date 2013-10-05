@@ -1,0 +1,11 @@
+sudo rm /root/.gforth/libcc-named/.libs/mysemaphore.a
+sudo rm /root/.gforth/libcc-named/.libs/mysemaphore.la
+sudo rm /root/.gforth/libcc-named/.libs/mysemaphore.lai
+sudo rm /root/.gforth/libcc-named/.libs/mysemaphore.o
+sudo rm /root/.gforth/libcc-named/.libs/mysemaphore.so
+sudo rm /root/.gforth/libcc-named/.libs/mysemaphore.so.0
+sudo rm /root/.gforth/libcc-named/.libs/mysemaphore.so.0.0.0
+sudo rm /root/.gforth/libcc-named/mysemaphore.c
+sudo rm /root/.gforth/libcc-named/mysemaphore.la
+sudo rm /root/.gforth/libcc-named/mysemaphore.lo
+sudo rm /root/.gforth/libcc-named/mysemaphore.o
