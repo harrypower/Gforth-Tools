@@ -1,0 +1,14 @@
+sudo rm /root/.gforth/libcc-named/.libs/mysqlite3.a
+sudo rm /root/.gforth/libcc-named/.libs/mysqlite3.la
+sudo rm /root/.gforth/libcc-named/.libs/mysqlite3.lai
+sudo rm /root/.gforth/libcc-named/.libs/mysqlite3.o
+sudo rm /root/.gforth/libcc-named/.libs/mysqlite3.so
+sudo rm /root/.gforth/libcc-named/.libs/mysqlite3.so.0
+sudo rm /root/.gforth/libcc-named/.libs/mysqlite3.so.0.0.0
+sudo rm /root/.gforth/libcc-named/mysqlite3.c
+sudo rm /root/.gforth/libcc-named/mysqlite3.la
+sudo rm /root/.gforth/libcc-named/mysqlite3.lo
+sudo rm /root/.gforth/libcc-named/mysqlite3.o
+
+
+
