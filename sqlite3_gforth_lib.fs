@@ -106,12 +106,12 @@ c-function sqlite3 sqlite3to4th a a a a n a a -- n
     
 end-c-library
 
-: z$! ( caddr u addr1 -- ) \ works with $! from string.fs but adds a null at end or string to pass to c code
+: z$! ( caddr u addr1 -- ) \ works with $! from string.fs but adds a null at end of string to pass to c code
     swap 1 + swap dup { pointer } $! \ note $! will free allocated memory if it needs to
     0 pointer $@ 1 - + c! ;
 
 : z$@ ( caddr -- caddr1 ) \ returns the pointer to char ready for c code to use!
-    $@ drop ;
+    $@ drop ;  \ remember caddr should be the address of a z$! creation so it should have a null at the end of the string
 
 struct
     cell% field dbname-$
@@ -134,21 +134,26 @@ sqlite3message%  %allot drop
     addr sqlmessg retbuffmaxsize-cell @ sqlmessg retbuff-$ z$!
     addr free throw ;
 
+200 mkretbuff \ start the return buffer at 200 bytes for now
+
 : mkerrorbuff ( -- )
     80 allocate throw { addr }
     addr 80 erase
     addr 80 sqlmessg dberrors-$ z$!
     addr free throw ;
 
-: initsqlmessg ( -- ) \ clear all sqlmessg data 
+: initsqlbuffers ( -- ) \ clear only the buffers to use sqlite3 but not the name or the cmds strings
+    mkerrorbuff
+    sqlmessg retbuffmaxsize-cell @ mkretbuff \ clear the return buffer but not resize it!
+    0 sqlmessg buffok-flag c! ; 
+
+: initsqlall ( -- ) \ clear all sqlmessg data 
     s" " sqlmessg dbname-$ z$!
     s" " sqlmessg dbcmds-$ z$!
-    mkerrorbuff
-    200 mkretbuff \ start with a return string buffer of 200 
-    s" ," sqlmessg seperator-$ z$!
-    0 sqlmessg buffok-flag c! ;
+    s" ," sqlmessg seperator-$ z$!  \ set separator to a comma
+    initsqlbuffers ;
 
-initsqlmessg \ structure now has allocated memory 
+initsqlall \ structure now has allocated memory
 
 : dbname ( caddr u -- )
     sqlmessg dbname-$ z$! ;
@@ -160,8 +165,7 @@ initsqlmessg \ structure now has allocated memory
     sqlmessg seperator-$ z$! ;
 
 : sendsqlite3cmd ( -- nerror ) \ will send the commands to sqlite3 and nerror contains false if no errors
-    mkerrorbuff
-    200 mkretbuff
+    initsqlbuffers
     sqlmessg dbname-$ z$@
     sqlmessg dbcmds-$ z$@
     sqlmessg dberrors-$ z$@
@@ -170,5 +174,8 @@ initsqlmessg \ structure now has allocated memory
     sqlmessg seperator-$ z$@
     sqlmessg buffok-flag 
     sqlite3
-    \ remember to put here the buffok-flag check to see if result buffer overflow has happened!
-;
+    dup 0 = if sqlmessg buffok-flag c@ 0<>
+	if drop 5932 \ 5932 is just a random number i made up for this return buffer size error 
+	    s" Return buffer to small to recieve all strings from sqlite3!" sqlmessg dberrors-$ z$!
+	then
+    then ;
