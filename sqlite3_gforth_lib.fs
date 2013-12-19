@@ -64,7 +64,7 @@ s" sqlite3" add-lib
 \ \c    }
 \c }
 \  filename is a string for the filename of the database.
-\  sqlite3_cmds is a string of the comands to send to sqlite3.
+\  sqlite3_cmds is a string of the commands to send to sqlite3.
 \  sqlite3_ermsg is the returned string of errors if any happen.
 \  buffer is a string that will contain the result of the sqlite3 commands if any results are expected!
 \  buffsize is the size or the buffer string including room for the null terminator
@@ -121,10 +121,10 @@ struct
     cell% field retbuffmaxsize-cell
     cell% field seperator-$
     char% field buffok-flag
+    cell% field error-cell
 end-struct sqlite3message%
 
 create sqlmessg
-\ sqlmessg sqlite3message% %size dup allot erase 
 sqlite3message%  %allot drop
 
 : mkretbuff ( nsize -- )
@@ -173,9 +173,16 @@ initsqlall \ structure now has allocated memory
     sqlmessg retbuffmaxsize-cell @
     sqlmessg seperator-$ z$@
     sqlmessg buffok-flag 
-    sqlite3
+    sqlite3 dup sqlmessg error-cell !
     dup 0 = if sqlmessg buffok-flag c@ 0<>
 	if drop 5932 \ 5932 is just a random number i made up for this return buffer size error 
 	    s" Return buffer to small to recieve all strings from sqlite3!" sqlmessg dberrors-$ z$!
 	then
     then ;
+
+: dberrmsg ( -- caddr u nerror )
+    sqlmessg dberrors-$ $@ 1 - sqlmessg error-cell @ ;
+
+: dbret$ ( -- caddr u )
+    sqlmessg retbuff-$ $@ 1 - ;
+
