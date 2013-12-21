@@ -79,7 +79,8 @@ s" sqlite3" add-lib
 \c theBuffer = buffer;
 \c maxBuffsize = buffsize;
 \c separator = sep;
-\c buffok[0]=0;
+\c buffok[0] = 0;
+\c bufferok = 0;
 \c
 \c rc = sqlite3_open( filename, &db ) ;
 \c if( rc ) {
