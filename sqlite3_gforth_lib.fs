@@ -166,20 +166,26 @@ initsqlall \ structure now has allocated memory
     sqlmessg seperator-$ z$! ;
 
 : sendsqlite3cmd ( -- nerror ) \ will send the commands to sqlite3 and nerror contains false if no errors
-    initsqlbuffers
-    sqlmessg dbname-$ z$@
-    sqlmessg dbcmds-$ z$@
-    sqlmessg dberrors-$ z$@
-    sqlmessg retbuff-$ z$@
-    sqlmessg retbuffmaxsize-cell @
-    sqlmessg seperator-$ z$@
-    sqlmessg buffok-flag 
-    sqlite3 dup sqlmessg error-cell !
-    dup 0 = if sqlmessg buffok-flag c@ 0<>
-	if drop 5932 \ 5932 is just a random number i made up for this return buffer size error 
-	    s" Return buffer to small to recieve all strings from sqlite3!" sqlmessg dberrors-$ z$!
+    TRY
+	initsqlbuffers
+	sqlmessg dbname-$ z$@
+	sqlmessg dbcmds-$ z$@
+	sqlmessg dberrors-$ z$@
+	sqlmessg retbuff-$ z$@
+	sqlmessg retbuffmaxsize-cell @
+	sqlmessg seperator-$ z$@
+	sqlmessg buffok-flag 
+	sqlite3 dup sqlmessg error-cell !
+	dup 0=
+	if sqlmessg buffok-flag c@ 0<>
+	    if drop  
+		s" Return buffer to small to recieve all strings from sqlite3!"
+		2dup sqlmessg dberrors-$ z$!
+		exception throw
+	    then
 	then
-    then ;
+    RESTORE 
+    ENDTRY ;
 
 : dberrmsg ( -- caddr u nerror )
     sqlmessg dberrors-$ $@ 1 - sqlmessg error-cell @ ;
