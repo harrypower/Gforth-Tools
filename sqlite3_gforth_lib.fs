@@ -42,6 +42,7 @@ s" sqlite3" add-lib
 \c int tempSize;
 \c int tempBuffsize;
 \c
+\  Note that this function will return the string "NULL" when there is a null in the db field 
 \c for(i = 0; i < argc ; i++) {
 \c      sprintf(temp,"%s",argv[i] ? argv[i] : "NULL");
 \c      strcat(temp,separator);    
@@ -71,6 +72,8 @@ s" sqlite3" add-lib
 \  sep is a string that contains the field and record seperator to incert into the returned result in buffer.
 \  buffok is a char string of dimention one that contains 0 or 1 depending on if the result returned fit in the buffsize of buffer.
 \  Note all these strings are need to be zero terminated at entry to this function.
+\  Note this function will return 0 when it can connect to named database and will return 1 if it cant connect to that file!
+\  Errors from sqlite3 will always be returned only in the sqlite3_ermsg string.
 \c 
 \c int sqlite3to4th( const char * filename, char * sqlite3_cmds, char * sqlite3_ermsg , char * buffer, int buffsize , char * sep, char * buffok) {
 \c sqlite3 *db;
@@ -106,6 +109,16 @@ c-function sqlite3 sqlite3to4th a a a a n a a -- n
 \ note that c strings are always null terminated unlike gforth strings! 
     
 end-c-library
+\ list of errors this code can produce apart from the sqlite3 library it self.
+\ note this gets enumerated once you call this library
+struct
+    cell% field retbuffover-err
+    cell% field retbuffover$
+end-struct sqlerrors%
+create sqlerrors
+sqlerrors% %allot drop
+s" Return buffer to small to recieve all strings from sqlite3!" sqlerrors retbuffover$ $!
+sqlerrors retbuffover$ $@ exception sqlerrors retbuffover-err !
 
 : z$! ( caddr u addr1 -- ) \ works with $! from string.fs but adds a null at end of string to pass to c code
     swap 1 + swap dup { pointer } $! \ note $! will free allocated memory if it needs to
@@ -178,18 +191,19 @@ initsqlall \ structure now has allocated memory
 	sqlite3 dup sqlmessg error-cell !
 	dup 0=
 	if sqlmessg buffok-flag c@ 0<>
-	    if drop  
-		s" Return buffer to small to recieve all strings from sqlite3!"
-		2dup sqlmessg dberrors-$ z$!
-		exception throw
+	    if
+		drop sqlerrors retbuffover$ $@ sqlmessg dberrors-$ z$!
+		sqlerrors retbuffover-err @ throw
 	    then
 	then
     RESTORE 
     ENDTRY ;
 
-: dberrmsg ( -- caddr u nerror )
+: dberrmsg ( -- caddr u nerror )  \ note the nerror is only 0 if sqlite3 connected to database otherwise it is 1.
+    \ Nerror can also return the sqlerrors retbuffover-err value meaning that return message did not fit in the buffer!
+    \ The caddr u will contain any error messages from sqlite3 itself so nerror may be zero while there is an error message!
     sqlmessg dberrors-$ $@ 1 - sqlmessg error-cell @ ;
 
-: dbret$ ( -- caddr u )
+: dbret$ ( -- caddr u ) \
     sqlmessg retbuff-$ $@ 1 - ;
 
