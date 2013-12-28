@@ -72,8 +72,9 @@ s" sqlite3" add-lib
 \  sep is a string that contains the field and record seperator to incert into the returned result in buffer.
 \  buffok is a char string of dimention one that contains 0 or 1 depending on if the result returned fit in the buffsize of buffer.
 \  Note all these strings are need to be zero terminated at entry to this function.
-\  Note this function will return 0 when it can connect to named database and will return 1 if it cant connect to that file!
-\  Errors from sqlite3 will always be returned only in the sqlite3_ermsg string.
+\  Note this function will return 0 when it can connect to named database
+\  All other numbers returned are errors #s directly recieved from sqlite3_exec() function!
+\  Error messages from sqlite3 will always be returned in the sqlite3_ermsg string.
 \c 
 \c int sqlite3to4th( const char * filename, char * sqlite3_cmds, char * sqlite3_ermsg , char * buffer, int buffsize , char * sep, char * buffok) {
 \c sqlite3 *db;
@@ -87,9 +88,9 @@ s" sqlite3" add-lib
 \c
 \c rc = sqlite3_open( filename, &db ) ;
 \c if( rc ) {
-\c    sprintf( sqlite3_ermsg,"Can't open database: %s\n", sqlite3_errmsg( db ) );
+\c    sprintf( sqlite3_ermsg,"SQL error: Can't open database: %s\n", sqlite3_errmsg( db ) );
 \c    sqlite3_close( db );
-\c    return 1;
+\c    return (rc);
 \c }
 \c    
 \c rc = sqlite3_exec( db, sqlite3_cmds, callback, 0, &zErrMsg );
@@ -99,7 +100,7 @@ s" sqlite3" add-lib
 \c }
 \c sqlite3_close( db );
 \c if(bufferok==1) buffok[0]=1;
-\c return 0;
+\c return (rc) ;
 \c }
 \c
 
@@ -199,9 +200,9 @@ initsqlall \ structure now has allocated memory
     RESTORE 
     ENDTRY ;
 
-: dberrmsg ( -- caddr u nerror )  \ note the nerror is only 0 if sqlite3 connected to database otherwise it is 1.
-    \ Nerror can also return the sqlerrors retbuffover-err value meaning that return message did not fit in the buffer!
-    \ The caddr u will contain any error messages from sqlite3 itself so nerror may be zero while there is an error message!
+: dberrmsg ( -- caddr u nerror )  \ note the nerror is only 0 if sqlite3 connected to database otherwise it is the sqlite3 error number.
+    \ Nerror can also return the sqlerrors retbuffover-err value meaning that return message did not fit in the buffer but only if sqlite3 retuned 0!
+    \ The caddr u will contain any error messages from sqlite3 itself and nerror should be either sqlite3 error#s or retbufferover-err value or 0!
     sqlmessg dberrors-$ $@ 1 - sqlmessg error-cell @ ;
 
 : dbret$ ( -- caddr u ) \
