@@ -33,7 +33,8 @@ s" sqlite3" add-lib
 \c
 \c char * theBuffer = 0;
 \c int maxBuffsize = 0;
-\c char * separator = 0;
+\c char * fseparator = 0;
+\c char * rseparator = 0;
 \c int bufferok =0;
 \c
 \c static int callback( void * NotUsed, int argc, char ** argv, char ** azColName ) {
@@ -45,7 +46,7 @@ s" sqlite3" add-lib
 \  Note that this function will return the string "NULL" when there is a null in the db field 
 \c for(i = 0; i < argc ; i++) {
 \c      sprintf(temp,"%s",argv[i] ? argv[i] : "NULL");
-\c      strcat(temp,separator);    
+\c      strcat(temp,fseparator);    
 \c      tempSize = strlen(temp);
 \c      tempBuffsize = strlen(theBuffer);
 \c      if((tempBuffsize + tempSize + 1) < maxBuffsize){
@@ -54,8 +55,8 @@ s" sqlite3" add-lib
 \c           bufferok = 1;
 \c           return 0; }
 \c      }
-\c if((strlen(theBuffer) + strlen(separator) + 1) < maxBuffsize) {
-\c    strcat(theBuffer,separator);
+\c if((strlen(theBuffer) + strlen(rseparator) + 1) < maxBuffsize) {
+\c    strcat(theBuffer,rseparator);
 \c    } else {
 \c    bufferok = 1; }
 \c return 0;
@@ -76,13 +77,14 @@ s" sqlite3" add-lib
 \  All other numbers returned are errors #s directly recieved from sqlite3_exec() function!
 \  Error messages from sqlite3 will always be returned in the sqlite3_ermsg string.
 \c 
-\c int sqlite3to4th( const char * filename, char * sqlite3_cmds, char * sqlite3_ermsg , char * buffer, int buffsize , char * sep, char * buffok) {
+\c int sqlite3to4th( const char * filename, char * sqlite3_cmds, char * sqlite3_ermsg , char * buffer, int buffsize , char * fsep, char * rsep, char * buffok) {
 \c sqlite3 *db;
 \c char * zErrMsg = 0 ;
 \c int rc = 0 ;
 \c theBuffer = buffer;
 \c maxBuffsize = buffsize;
-\c separator = sep;
+\c fseparator = fsep;
+\c rseparator = rsep;
 \c buffok[0] = 0;
 \c bufferok = 0;
 \c
@@ -106,7 +108,7 @@ s" sqlite3" add-lib
 
 \ **** sqlite3 gforth wrappers ****
 
-c-function sqlite3 sqlite3to4th a a a a n a a -- n
+c-function sqlite3 sqlite3to4th a a a a n a a a -- n
 \ note that c strings are always null terminated unlike gforth strings! 
     
 end-c-library
@@ -134,7 +136,8 @@ struct
     cell% field dberrors-$
     cell% field retbuff-$
     cell% field retbuffmaxsize-cell
-    cell% field seperator-$
+    cell% field fseparator-$
+    cell% field rseparator-$
     char% field buffok-flag
     cell% field error-cell
 end-struct sqlite3message%
@@ -165,29 +168,34 @@ sqlite3message%  %allot drop
 : initsqlall ( -- ) \ clear all sqlmessg data 
     s" " sqlmessg dbname-$ z$!
     s" " sqlmessg dbcmds-$ z$!
-    s" ," sqlmessg seperator-$ z$!  \ set separator to a comma
+    s" ," sqlmessg fseparator-$ z$!   \ set field separator to a comma
+    s\" \n" sqlmessg rseparator-$ z$! \ set record seperatore to linefeed 
     initsqlbuffers ;
 
 initsqlall \ structure now has allocated memory
 
-: dbname ( caddr u -- )
+: dbname ( caddr u -- )  \ set the db name with string
     sqlmessg dbname-$ z$! ;
 
-: dbcmds ( caddr u -- )
+: dbcmds ( caddr u -- ) \ the string for the db commands to send sqlite3
     sqlmessg dbcmds-$ z$! ;
 
-: dbfieldseparator ( caddr u -- )
-    sqlmessg seperator-$ z$! ;
+: dbfieldseparator ( caddr u -- ) \ this string is the returned field separator used 
+    sqlmessg fseparator-$ z$! ;
+
+: dbrecordseparator ( caddr u -- ) \ this string is the returned record separator used
+    sqlmessg rseparator-$ z$! ;
 
 : sendsqlite3cmd ( -- nerror ) \ will send the commands to sqlite3 and nerror contains false if no errors
     TRY
 	initsqlbuffers
 	sqlmessg dbname-$ z$@
-	sqlmessg dbcmds-$ z$@
+sqlmessg dbcmds-$ z$@
 	sqlmessg dberrors-$ z$@
 	sqlmessg retbuff-$ z$@
 	sqlmessg retbuffmaxsize-cell @
-	sqlmessg seperator-$ z$@
+	sqlmessg fseparator-$ z$@
+	sqlmessg rseparator-$ z$@
 	sqlmessg buffok-flag 
 	sqlite3 dup sqlmessg error-cell !
 	dup 0=
