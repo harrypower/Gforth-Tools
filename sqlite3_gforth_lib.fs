@@ -190,7 +190,7 @@ initsqlall \ structure now has allocated memory
     TRY
 	initsqlbuffers
 	sqlmessg dbname-$ z$@
-sqlmessg dbcmds-$ z$@
+        sqlmessg dbcmds-$ z$@
 	sqlmessg dberrors-$ z$@
 	sqlmessg retbuff-$ z$@
 	sqlmessg retbuffmaxsize-cell @
