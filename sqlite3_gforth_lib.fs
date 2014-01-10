@@ -123,6 +123,9 @@ sqlerrors% %allot drop
 s" Return buffer to small to recieve all strings from sqlite3!" sqlerrors retbuffover$ $!
 sqlerrors retbuffover$ $@ exception sqlerrors retbuffover-err !
 
+: -NULL$ ( caddr u -- caddr u1 ) \ searchs for 0 or NULL in sting and when found reduces count of string to not include NULL
+    2dup s"  " over 0 swap c! search if swap drop - else 2drop then ;
+
 : z$! ( caddr u addr1 -- ) \ works with $! from string.fs but adds a null at end of string to pass to c code
     swap 1 + swap dup { pointer } $! \ note $! will free allocated memory if it needs to
     0 pointer $@ 1 - + c! ;
@@ -211,8 +214,8 @@ initsqlall \ structure now has allocated memory
 : dberrmsg ( -- caddr u nerror )  \ note the nerror is only 0 if sqlite3 connected to database otherwise it is the sqlite3 error number.
     \ Nerror can also return the sqlerrors retbuffover-err value meaning that return message did not fit in the buffer but only if sqlite3 retuned 0!
     \ The caddr u will contain any error messages from sqlite3 itself and nerror should be either sqlite3 error#s or retbufferover-err value or 0!
-    sqlmessg dberrors-$ $@ 1 - sqlmessg error-cell @ ;
+    sqlmessg dberrors-$ $@ -NULL$ sqlmessg error-cell @ ;
 
 : dbret$ ( -- caddr u ) \
-    sqlmessg retbuff-$ $@ 1 - ;
+    sqlmessg retbuff-$ $@ -NULL$ ;
 
