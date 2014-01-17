@@ -18,7 +18,43 @@
 \ sudo apt-get install sqlite3 libsqlite3-dev
 \ These apt-get installs are needed to connect this code to sqlite3 code
 
-\ I will put here how to use this code when i get there!
+\ How to use this library as follows:
+\ -First simply include it into your Gforth code like normal:
+\ include sqlite3_gforth_lib.fs
+\ -Now each database is simply a file as sqlite3 is an embeded database that is how it is done.
+\  This means you give the path of the file to this code to work on that database:
+\ s" /full-path-to-your-db-file/dbname-here" dbname
+\ -Next you form your SQL statement to get some data from the database:
+\ s" select * from mytable ;" dbcmds
+\ - Next you issue give the info to sqlite3 to get your results:
+\ sendsqlite3cmd throw
+\  Note sendsqlite3cmd will return an error if one happens or false (0) if no error
+\ - Now get the results back for processing in any way you see fit:
+\ dbret$
+\   This simply returns a counted string that has the results returned from your SQL querie
+\   Note not all queries result in a response so you need to understand SQL to understand how this is used.
+\ -If you want more error information use the following:
+\ dberrmsg
+\   This will return the same error number that sendsqlite3cmd returns with also a counted string with error message.
+\ -You will note the SQL return string will have fields and records separated with ',' and cr.
+\   To change these separator strings use the follwoing:
+\ s" **" dbfieldseparator
+\   This makes the field separator "**"
+\ s" &" dbrecordseparator
+\   This makes the record separator "&"
+\   Note there is a special response from SQL called null.  This is handled such that if null is ever returned
+\   it is returned as "NULL".  So do not use NULL in your datasets or as a separator string or your code
+\   will not know when a real null is encountered in your datasets!
+\ -To prevend memory leaks this code allocates room for the return string and manages that string.
+\   Sometimes you will find the 200 bytes allocated will not be enough for the returned SQL result.
+\   This will cause an error "Return buffer to samll to reiceve all strings from sqlite3!" message.
+\   This can be fixed by enlarging the return buffer as follows:
+\ 1000 mkretbuff
+\   In fact you can make the return buffer any size you want as long as gforth has that memory to allocate or you will get
+\   errors from Gforth about memory issues.  This example sets the buffer to 1000 bytes.  Note after this resizing is done
+\   the buffer will stay that size until you change it or your program restarts and then the default 200 bytes will be used.
+\ -The return strings from dbret$ will only return the amount of the string from SQLITE3 so remember that last part of that
+\   string will be the record separator proceeded by the field separator. 
 
 include string.fs
 
