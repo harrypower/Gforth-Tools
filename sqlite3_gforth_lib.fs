@@ -56,7 +56,7 @@
 \ -The return strings from dbret$ will only return the amount of the string from SQLITE3 so remember that last part of that
 \   string will be the record separator proceeded by the field separator. 
 
-include string.fs
+require string.fs
 
 clear-libs
 c-library mysqlite3
