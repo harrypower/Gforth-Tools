@@ -5,5 +5,9 @@
 dpkg -i ffl-gforth_0.8.0-1_all.deb
 
 echo "Forth Foundation Library now installed!"
+echo "Note the files are stored at /usr/share/gforth/site-forth/ffl path!" 
+echo "Also note that this works on version 0.7.0 gforth only!"
+echo "Other versions of gforth may need the files at /usr/local/share/gforth/site-forth/ffl path to work correctly!"
+echo "You can transfer the files or you can just use the full path when including the files on other version of Gforth!"
 
 exit 0
