@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# Run this script as root to install 
+
+dpkg -r ffl-gforth
+
+echo "Forth Foundation Library now uninstalled!"
+
+exit 0

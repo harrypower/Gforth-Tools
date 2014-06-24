@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# Run this script as root to install 
+
+dpkg -i ffl-gforth_0.8.0-1_all.deb
+
+echo "Forth Foundation Library now installed!"
+
+exit 0
