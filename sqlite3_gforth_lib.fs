@@ -58,7 +58,6 @@
 
 require string.fs
 
-clear-libs
 c-library mysqlite3
 
 s" sqlite3" add-lib
