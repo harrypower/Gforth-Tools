@@ -16,7 +16,6 @@
 
 [IFUNDEF] semaphore-constants
 
-clear-libs
 c-library mysemaphore
 s" rt" add-lib
 \c #include <semaphore.h> 
