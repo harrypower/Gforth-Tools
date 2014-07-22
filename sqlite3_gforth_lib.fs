@@ -155,7 +155,7 @@ struct
     cell% field retbuffover$
 end-struct sqlerrors%
 create sqlerrors
-sqlerrors% %allot drop
+sqlerrors% %allot sqlerrors% %size 0 fill
 s" Return buffer to small to recieve all strings from sqlite3!" sqlerrors retbuffover$ $!
 sqlerrors retbuffover$ $@ exception sqlerrors retbuffover-err !
 
