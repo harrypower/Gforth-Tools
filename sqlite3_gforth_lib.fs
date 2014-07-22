@@ -189,7 +189,7 @@ sqlmessg sqlite3message% %size 0 fill
     sqlmessg retbuffmaxsize-cell !
     sqlmessg retbuffmaxsize-cell @ allocate throw { addr } 
     addr sqlmessg retbuffmaxsize-cell @ 0 fill
-    addr sqlmessg retbuffmaxsize-cell @ sqlmessg retbuff-$ z$!
+    addr sqlmessg retbuffmaxsize-cell @ sqlmessg retbuff-$ dup $off z$!
     addr free throw ;
 
 100 cells mkretbuff \ start the return buffer at 100 cells or 400 bytes on 32 bit machines
@@ -197,7 +197,7 @@ sqlmessg sqlite3message% %size 0 fill
 : mkerrorbuff ( -- )
     30 cells allocate throw { addr }
     addr 30 cells 0 fill
-    addr 30 cells sqlmessg dberrors-$ z$!
+    addr 30 cells sqlmessg dberrors-$ dup $off z$!
     addr free throw ;
 
 : initsqlbuffers ( -- ) \ clear only the buffers to use sqlite3 but not the name or the cmds strings
@@ -206,25 +206,25 @@ sqlmessg sqlite3message% %size 0 fill
     0 sqlmessg buffok-flag c! ; 
 
 : initsqlall ( -- ) \ clear all sqlmessg data 
-    s" " sqlmessg dbname-$ z$!
-    s" " sqlmessg dbcmds-$ z$!
-    s" ," sqlmessg fseparator-$ z$!   \ set field separator to a comma
-    s\" \n" sqlmessg rseparator-$ z$! \ set record seperatore to linefeed 
+    s" " sqlmessg dbname-$ dup $off z$!
+    s" " sqlmessg dbcmds-$ dup $off z$!
+    s" ," sqlmessg fseparator-$ dup $off z$!   \ set field separator to a comma
+    s\" \n" sqlmessg rseparator-$ dup $off z$! \ set record seperatore to linefeed 
     initsqlbuffers ;
 
 initsqlall \ structure now has allocated memory
 
 : dbname ( caddr u -- )  \ set the db name with string
-    sqlmessg dbname-$ z$! ;
+    sqlmessg dbname-$ dup $off z$! ;
 
 : dbcmds ( caddr u -- ) \ the string for the db commands to send sqlite3
-    sqlmessg dbcmds-$ z$! ;
+    sqlmessg dbcmds-$ dup $off z$! ;
 
 : dbfieldseparator ( caddr u -- ) \ this string is the returned field separator used 
-    sqlmessg fseparator-$ z$! ;
+    sqlmessg fseparator-$ dup $off z$! ;
 
 : dbrecordseparator ( caddr u -- ) \ this string is the returned record separator used
-    sqlmessg rseparator-$ z$! ;
+    sqlmessg rseparator-$ dup $off z$! ;
 
 : sendsqlite3cmd ( -- nerror ) \ will send the commands to sqlite3 and nerror contains false if no errors
     TRY
@@ -241,7 +241,7 @@ initsqlall \ structure now has allocated memory
 	dup 0=
 	if sqlmessg buffok-flag c@ 0<>
 	    if
-		drop sqlerrors retbuffover$ $@ sqlmessg dberrors-$ z$!
+		drop sqlerrors retbuffover$ $@ sqlmessg dberrors-$ dup $off z$!
 		sqlerrors retbuffover-err @ throw
 	    then
 	then
