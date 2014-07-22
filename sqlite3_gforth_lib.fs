@@ -159,8 +159,8 @@ sqlerrors% %allot drop
 s" Return buffer to small to recieve all strings from sqlite3!" sqlerrors retbuffover$ $!
 sqlerrors retbuffover$ $@ exception sqlerrors retbuffover-err !
 
-: -NULL$ ( caddr u -- caddr u1 ) \ searchs for 0 or NULL in sting and when found reduces count of string to not include NULL
-    2dup s"  " over 0 swap c! search if swap drop - else 2drop then ;
+: -NULL$ ( caddr u -- caddr1 u1 ) \ searchs for 0 or NULL in sting and when found reduces count of string to not include NULL
+    0 $split 2drop ;
 
 : z$! ( caddr u addr1 -- ) \ works with $! from string.fs but adds a null at end of string to pass to c code
     swap 1 + swap dup { pointer } $! \ note $! will free allocated memory if it needs to
@@ -188,16 +188,16 @@ sqlmessg sqlite3message% %size 0 fill
 : mkretbuff ( nsize -- )
     sqlmessg retbuffmaxsize-cell !
     sqlmessg retbuffmaxsize-cell @ allocate throw { addr } 
-    addr sqlmessg retbuffmaxsize-cell @ erase
+    addr sqlmessg retbuffmaxsize-cell @ 0 fill
     addr sqlmessg retbuffmaxsize-cell @ sqlmessg retbuff-$ z$!
     addr free throw ;
 
-200 mkretbuff \ start the return buffer at 200 bytes for now
+100 cells mkretbuff \ start the return buffer at 100 cells or 400 bytes on 32 bit machines
 
 : mkerrorbuff ( -- )
-    100 allocate throw { addr }
-    addr 100 erase
-    addr 100 sqlmessg dberrors-$ z$!
+    30 cells allocate throw { addr }
+    addr 30 cells 0 fill
+    addr 30 cells sqlmessg dberrors-$ z$!
     addr free throw ;
 
 : initsqlbuffers ( -- ) \ clear only the buffers to use sqlite3 but not the name or the cmds strings
