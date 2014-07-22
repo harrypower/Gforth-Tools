@@ -183,6 +183,7 @@ end-struct sqlite3message%
 
 create sqlmessg
 sqlite3message%  %allot drop
+sqlmessg sqlite3message% %size 0 fill
 
 : mkretbuff ( nsize -- )
     sqlmessg retbuffmaxsize-cell !
@@ -194,9 +195,9 @@ sqlite3message%  %allot drop
 200 mkretbuff \ start the return buffer at 200 bytes for now
 
 : mkerrorbuff ( -- )
-    80 allocate throw { addr }
-    addr 80 erase
-    addr 80 sqlmessg dberrors-$ z$!
+    100 allocate throw { addr }
+    addr 100 erase
+    addr 100 sqlmessg dberrors-$ z$!
     addr free throw ;
 
 : initsqlbuffers ( -- ) \ clear only the buffers to use sqlite3 but not the name or the cmds strings
