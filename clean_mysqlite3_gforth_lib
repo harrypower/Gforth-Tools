@@ -10,5 +10,5 @@ sudo rm /root/.gforth/libcc-named/mysqlite3.la
 sudo rm /root/.gforth/libcc-named/mysqlite3.lo
 sudo rm /root/.gforth/libcc-named/mysqlite3.o
 
-
+echo "if you are using a beagle bone black rev c you may also find files at /.gforth/libcc-named/ and /.gforth/libcc-named/.libs"
 
