@@ -16,7 +16,7 @@
 \   Some words that make using structures in gforth simpler
 \   Works with struct and end-struct structures
 
-: allocate-structure ( usize ustruct "allocated-structure-name" -- )  \ creates a word called allocated-structure-name
+: allocate-structure: ( usize ustruct "allocated-structure-name" -- )  \ creates a word called allocated-structure-name
   \ usize is the quantity of the indexed array to create
   \ ustruct is the size of the structure that is returned from the name used with end-struct
 	%size dup rot swap * allocate throw create , ,
@@ -31,7 +31,7 @@ struct
   cell% field item2
 end-struct stuff%
 
-30 stuff% allocate-structure mystructure
+30 stuff% allocate-structure: mystructure
 
 : fillit ( -- )
   30 0 do
